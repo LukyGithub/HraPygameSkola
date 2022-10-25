@@ -5,16 +5,17 @@
     },
     "activeFile": "level01.tmx",
     "expandedProjectPaths": [
+        ".vscode",
         "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "level01.tmx": {
-            "scale": 5.5,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 64.36363636363636,
-                "y": 107.63636363636364
+                "x": 223.3333333333333,
+                "y": 91.33333333333334
             }
         },
         "static.tsx": {
