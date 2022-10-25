@@ -3,14 +3,13 @@ from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.stacklayout import StackLayout
-from kivy.uix.button import Button
 from kivy.uix.image import Image
+from kivy.graphics import Rectangle
 from kivy.metrics import dp    
 from kivy.core.window import Window
+
 from PIL import Image as PILImage
+
 WINDOW_SIZE = (800, 600)
 Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
 
@@ -41,20 +40,24 @@ class EscapeGame(Widget):
         self.movable = False
         self.animation = "Up"
         self.animationFrame = 0
+        self.grounded = False
 
         #!!!!
         # Widget Initialization
         #!!!!
-
-        bgSizes = (PILImage.open("level01.png").width, PILImage.open("level01.png").height)
-        self.bg = Image(source="level01.png", height=str(bgSizes[1] * 3.75), width=bgSizes[0] * 3.125, allow_stretch=True, keep_ratio=False)
+        self.bgSizes = PILImage.open("level01.png")
+        self.bgPixels = self.bgSizes.convert("RGB")
+        self.bg = Image(source="level01.png", width=self.bgSizes.width * 3.125, height=self.bgSizes.height * 3.75, allow_stretch=True, keep_ratio=False)
         self.bg.texture.mag_filter = "nearest"
         self.add_widget(self.bg)
 
         self.player = Image(source="./animations/player_0_0.png", width=dp(120), height=dp(120), allow_stretch=True)
         self.player.texture.mag_filter = "nearest"
         self.add_widget(self.player)
-        self.player.pos[1] = dp(10)
+        self.player.pos[1] = dp(25)
+        self.player.pos[0] = dp(100)
+
+        self.playerDot = Rectangle
 
         # UPDATE
 
@@ -102,42 +105,54 @@ class EscapeGame(Widget):
     def update(self, deltaTime, **kwargs):
         #Movement
         if self.movable:
-            Clock
-            if self.left:
-                self.player.pos[0] += -100 * deltaTime * self.playerSpeed
-            if self.right:
-                self.player.pos[0] += 100 * deltaTime * self.playerSpeed
-            if self.down:
-                self.animationFrame = 15
-                Clock.schedule_interval(self.downAnimation, 1/60)
-        elif self.up:
-            self.animationFrame = 0
-            Clock.schedule_interval(self.upAnimation, 1/60) #gets trigerred multiple times!!!
+            if self.left == True:
+                self.bg.pos[0] += 100 * deltaTime * self.playerSpeed
+            if self.right == True:
+                self.bg.pos[0] -= 100 * deltaTime * self.playerSpeed
+            if self.down == True and self.grounded == True:
+                Clock.unschedule(self.moveAnimation)
+                self.down = False
+                self.animationFrame = 16
+                Clock.schedule_interval(self.downAnimation, 1/30)
+        elif self.up == True:
+            self.up = False
+            self.animationFrame = -1
+            Clock.schedule_interval(self.upAnimation, 1/30)
+
+        #Colision
+
+        # if self.movable: #collision doesent need to be done when not moving
+        #     if self.bgPixels.getpixel((self.player.pos[0], self.player.pos[1] - 1)) == (255, 255, 255):
+        #         self.grounded = True
+        #     else:
+        #         self.grounded = False
+        #         self.player.pos[1] -= 1
+        
 
     def upAnimation(self, deltaTime):
-        self.animationFrame += 0.1
-        print("./animations/sprite_" + str(round(self.animationFrame)) + ".png")
-        self.player.source = "./animations/player_0_" + str(round(self.animationFrame)) + ".png"
+        self.animationFrame += 1
+        self.player.source = "./animations/player_0_" + str(self.animationFrame) + ".png"
         self.player.texture.mag_filter = "nearest"
         if self.animationFrame >=15:
             self.movable = True
             Clock.unschedule(self.upAnimation)
+            self.animationFrame = 11
+            Clock.schedule_interval(self.moveAnimation, 1/30)
 
     def downAnimation(self, deltaTime):
-        self.animationFrame -= 0.1
-        self.player.source = "./animations/player_0_" + str(round(self.animationFrame)) + ".png"
+        self.animationFrame -= 1
+        self.player.source = "./animations/player_0_" + str(self.animationFrame) + ".png"
         self.player.texture.mag_filter = "nearest"
         if self.animationFrame <= 0:
             self.movable = False
             Clock.unschedule(self.downAnimation)
 
     def moveAnimation(self, deltaTime):
-        self.animationFrame -= 0.1
-        self.player.source = "./animations/player_0_" + str(round(self.animationFrame)) + ".png"
+        self.animationFrame += 1
+        self.player.source = "./animations/player_0_" + str(self.animationFrame) + ".png"
         self.player.texture.mag_filter = "nearest"
-        if self.animationFrame <= 0:
-            self.movable = False
-            Clock.unschedule(self.downAnimation)
+        if self.animationFrame >= 15:
+            self.animationFrame = 11
             
 
 
