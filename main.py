@@ -4,7 +4,6 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
 from kivy.uix.image import Image
-from kivy.graphics import Rectangle
 from kivy.metrics import dp    
 from kivy.core.window import Window
 
@@ -12,6 +11,9 @@ from PIL import Image as PILImage
 
 WINDOW_SIZE = (800, 600)
 Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
+
+def clamp(val, miminum, maximum):
+    return min(maximum, max(miminum, val))
 
 class EscapeGame(Widget):
     def __init__(self, **kwargs):
@@ -41,12 +43,16 @@ class EscapeGame(Widget):
         self.animation = "Up"
         self.animationFrame = 0
         self.grounded = False
+        self.velocity = 0
+        self.jumpHeight = 750
+        self.gravity = 981 * 2
 
         #!!!!
         # Widget Initialization
         #!!!!
         self.bgSizes = PILImage.open("level01.png")
-        self.bgPixels = self.bgSizes.convert("RGB")
+        self.bgCollisions = PILImage.open("level01Collisions.png")
+        self.bgPixels = self.bgCollisions.convert("RGB")
         self.bg = Image(source="level01.png", width=self.bgSizes.width * 3.125, height=self.bgSizes.height * 3.75, allow_stretch=True, keep_ratio=False)
         self.bg.texture.mag_filter = "nearest"
         self.add_widget(self.bg)
@@ -57,12 +63,14 @@ class EscapeGame(Widget):
         self.player.pos[1] = dp(25)
         self.player.pos[0] = dp(100)
 
-        self.playerDot = Rectangle
+        self.playerDot = Image(source="debugDot.png")
+        self.playerDot.mag_filter = "nearest"
+        self.playerDot.width = 10
+        self.playerDot.height = 10
+        self.add_widget(self.playerDot)
 
         # UPDATE
-
         Clock.schedule_interval(self.update, 1/60)
-        self.right = False
 
     def _keyboard_closed(self):
         print('My keyboard have been closed!')
@@ -103,6 +111,17 @@ class EscapeGame(Widget):
             self.ctrl = False
 
     def update(self, deltaTime, **kwargs):
+        playerPos = (self.bg.pos[0]) * -1 + self.player.pos[0]
+
+        #Colision (is calculated first but executed last)
+        if self.movable: #collision doesen't need to be done when not moving
+            if self.bgPixels.getpixel((     clamp(round((playerPos +41) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime)/3.75), 0, self.bgSizes.height)    )) == (255, 255, 255):
+                self.grounded = True
+                self.velocity = 0
+            else:
+                self.grounded = False
+                self.velocity -= self.gravity * deltaTime
+
         #Movement
         if self.movable:
             if self.left == True:
@@ -114,19 +133,15 @@ class EscapeGame(Widget):
                 self.down = False
                 self.animationFrame = 16
                 Clock.schedule_interval(self.downAnimation, 1/30)
+            if self.up == True and self.grounded == True:
+                self.velocity = self.jumpHeight
         elif self.up == True:
             self.up = False
             self.animationFrame = -1
             Clock.schedule_interval(self.upAnimation, 1/30)
+        self.playerDot.pos = (self.player.pos[0] + 41, self.player.pos[1])
 
-        #Colision
-
-        # if self.movable: #collision doesent need to be done when not moving
-        #     if self.bgPixels.getpixel((self.player.pos[0], self.player.pos[1] - 1)) == (255, 255, 255):
-        #         self.grounded = True
-        #     else:
-        #         self.grounded = False
-        #         self.player.pos[1] -= 1
+        self.player.pos[1] += self.velocity * deltaTime
         
 
     def upAnimation(self, deltaTime):
