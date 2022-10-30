@@ -6,6 +6,7 @@ from kivy.properties import NumericProperty
 from kivy.uix.image import Image
 from kivy.metrics import dp    
 from kivy.core.window import Window
+from kivy.core.audio import SoundLoader
 
 from PIL import Image as PILImage
 
@@ -50,18 +51,18 @@ class EscapeGame(Widget):
         #!!!!
         # Widget Initialization
         #!!!!
+        self.player = Image(source="./animations/player_0_0.png", width=dp(120), height=dp(120), allow_stretch=True)
+        self.player.texture.mag_filter = "nearest"
+        self.add_widget(self.player)
+        self.player.pos[1] = dp(25)
+        self.player.pos[0] = dp(100)
+
         self.bgSizes = PILImage.open("level01.png")
         self.bgCollisions = PILImage.open("level01Collisions.png")
         self.bgPixels = self.bgCollisions.convert("RGB")
         self.bg = Image(source="level01.png", width=self.bgSizes.width * 3.125, height=self.bgSizes.height * 3.75, allow_stretch=True, keep_ratio=False)
         self.bg.texture.mag_filter = "nearest"
         self.add_widget(self.bg)
-
-        self.player = Image(source="./animations/player_0_0.png", width=dp(120), height=dp(120), allow_stretch=True)
-        self.player.texture.mag_filter = "nearest"
-        self.add_widget(self.player)
-        self.player.pos[1] = dp(25)
-        self.player.pos[0] = dp(100)
 
         self.playerDot = Image(source="debugDot.png")
         self.playerDot.mag_filter = "nearest"
@@ -70,7 +71,11 @@ class EscapeGame(Widget):
         self.add_widget(self.playerDot)
 
         # UPDATE
+        self.gameSong = SoundLoader.load('gameMusicYay.mp3')
+        self.riseSfx = SoundLoader.load('rockRise.mp3')
+        self.gameSong.play()
         Clock.schedule_interval(self.update, 1/60)
+        Clock.schedule_interval(self.playSong, self.gameSong.length)
 
     def _keyboard_closed(self):
         print('My keyboard have been closed!')
@@ -130,12 +135,30 @@ class EscapeGame(Widget):
 
         #Movement && part of colisions
         if self.movable:
-            if self.left == True and self.bgPixels.getpixel((     clamp(round((playerPos +39) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 1)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
-                if self.bgPixels.getpixel((     clamp(round((playerPos +39) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +39) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 51)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+            if self.left == True:
+                if self.bgPixels.getpixel((     clamp(round((playerPos +36) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 1)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+                    if self.bgPixels.getpixel((     clamp(round((playerPos +36) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +36) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 51)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+                        self.bg.pos[0] += 100 * deltaTime * self.playerSpeed
+                elif self.bgPixels.getpixel((     clamp(round((playerPos +36) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - ((self.player.pos[1] + self.velocity * deltaTime + 1)/3.75 + 2)), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
                     self.bg.pos[0] += 100 * deltaTime * self.playerSpeed
-            if self.right == True and self.bgPixels.getpixel((     clamp(round((playerPos +75) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 1)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
-                if self.bgPixels.getpixel((     clamp(round((playerPos +75) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +75) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 51)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+                    self.player.pos[1] += 6
+            if self.right == True:
+                # Checks for all three collision points wheather theres a wall/collision object in the way
+                if  self.bgPixels.getpixel((     clamp(round((playerPos +76) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 1)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+                    if self.bgPixels.getpixel((     clamp(round((playerPos +76) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +76) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 51)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+                        self.bg.pos[0] -= 100 * deltaTime * self.playerSpeed
+                # Makes sure its not just stairs
+                elif self.bgPixels.getpixel((     clamp(round((playerPos +76) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - ((self.player.pos[1] + self.velocity * deltaTime + 1)/3.75 +2)), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
                     self.bg.pos[0] -= 100 * deltaTime * self.playerSpeed
+                    self.player.pos[1] += 6
+            if self.bgPixels.getpixel((     clamp(round((playerPos +41) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime)/3.75), 0, self.bgSizes.height - 1)    )) == (255, 255, 255):
+                self.grounded = True
+            elif self.bgPixels.getpixel((     clamp(round((playerPos +73) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime)/3.75), 0, self.bgSizes.height -1)    )) == (255, 255, 255):
+                self.grounded = True
+            elif self.bgPixels.getpixel((     clamp(round((playerPos +57) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime)/3.75), 0, self.bgSizes.height -1)    )) == (255, 255, 255):
+                self.grounded = True
+            else:
+                self.grounded = False
             if self.down == True and self.grounded == True:
                 Clock.unschedule(self.moveAnimation)
                 self.down = False
@@ -147,9 +170,16 @@ class EscapeGame(Widget):
             self.up = False
             self.animationFrame = -1
             Clock.schedule_interval(self.upAnimation, 1/30)
+            self.riseSfx.play()
         self.playerDot.pos = (self.player.pos[0] + 73, self.player.pos[1] + 102)
 
-        self.player.pos[1] += self.velocity * deltaTime
+        # More Collisions yay! (this time on the top)
+        if self.velocity * deltaTime > 0 and self.bgPixels.getpixel((     clamp(round((playerPos +73) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +41) / 3.125), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
+            self.player.pos[1] += self.velocity * deltaTime
+        elif self.velocity * deltaTime > 0:
+            self.velocity = 0
+        else:
+            self.player.pos[1] += self.velocity * deltaTime
         
 
     def upAnimation(self, deltaTime):
@@ -176,6 +206,9 @@ class EscapeGame(Widget):
         self.player.texture.mag_filter = "nearest"
         if self.animationFrame >= 15:
             self.animationFrame = 11
+    
+    def playSong(self, dt):
+        self.gameSong.play()
             
 
 
