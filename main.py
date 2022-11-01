@@ -57,6 +57,11 @@ class EscapeGame(Widget):
         self.player.pos[1] = dp(25)
         self.player.pos[0] = dp(100)
 
+        self.enemy = []
+        for i in range(0, 1):
+            self.enemy.append(Image(source="./animations/sprite_1_0.png"))
+            self.add_widget(self.enemy[i])
+
         self.bgSizes = PILImage.open("level01.png")
         self.bgCollisions = PILImage.open("level01Collisions.png")
         self.bgPixels = self.bgCollisions.convert("RGB")
@@ -73,6 +78,7 @@ class EscapeGame(Widget):
         # UPDATE
         self.gameSong = SoundLoader.load('gameMusicYay.mp3')
         self.riseSfx = SoundLoader.load('rockRise.mp3')
+        self.settleSfx = SoundLoader.load('rockSettle.mp3')
         self.gameSong.play()
         Clock.schedule_interval(self.update, 1/60)
         Clock.schedule_interval(self.playSong, self.gameSong.length)
@@ -164,6 +170,7 @@ class EscapeGame(Widget):
                 self.down = False
                 self.animationFrame = 16
                 Clock.schedule_interval(self.downAnimation, 1/30)
+                self.settleSfx.play()
             if self.up == True and self.grounded == True:
                 self.velocity = self.jumpHeight
         elif self.up == True:
