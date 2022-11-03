@@ -14,8 +14,8 @@
             "scale": 4,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 274.5,
-                "y": 141
+                "x": 269,
+                "y": 107.75
             }
         },
         "static.tsx": {
@@ -36,8 +36,8 @@
     ],
     "project": "escape.tiled-project",
     "recentFiles": [
-        "static.tsx",
-        "level01.tmx"
+        "level01.tmx",
+        "static.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
