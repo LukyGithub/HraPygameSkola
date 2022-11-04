@@ -11,15 +11,15 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "level01.tmx": {
-            "scale": 4,
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 269,
-                "y": 107.75
+                "x": 628.5,
+                "y": 126
             }
         },
         "static.tsx": {
-            "scaleInDock": 2,
+            "scaleInDock": 3.5,
             "scaleInEditor": 1
         }
     },
@@ -36,8 +36,8 @@
     ],
     "project": "escape.tiled-project",
     "recentFiles": [
-        "level01.tmx",
-        "static.tsx"
+        "static.tsx",
+        "level01.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

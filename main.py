@@ -62,7 +62,6 @@ class EscapeGame(Widget):
         self.prevEnemyPos = [787, 1725, 1725, 2812, 2812, 2812, 2812, 2812, 2625, 2625, 2625, 5550, 5550, 6120, 6300, 6487, 7330, 7811, 6825, 6825]
         self.enemyY = [57, 57, 57, 11, 11, 11, 11, 11, 255, 255, 255, 133, 375, 210, 210, 210, 191, 191, 11, 11]
         for i in range(0, 20):
-            print("This is the maximum of guards", i)
             self.warningCircle.append(Image(source="warningCircle.png", width=200, height=200, allow_stretch=True, keep_ratio=False))
             self.warningCircle[i].texture.mag_filter = "nearest"
             self.warningCircle[i].opacity = 0.5
@@ -81,12 +80,6 @@ class EscapeGame(Widget):
         self.bg.texture.mag_filter = "nearest"
         self.bg.pos[0] = -350
         self.add_widget(self.bg)
-
-        self.playerDot = Image(source="debugDot.png")
-        self.playerDot.mag_filter = "nearest"
-        self.playerDot.width = 10
-        self.playerDot.height = 10
-        self.add_widget(self.playerDot)
 
         # Value Initalization
         self.playerSpeed = 2.5
@@ -121,7 +114,6 @@ class EscapeGame(Widget):
         Clock.schedule_interval(self.playSong, self.gameSong.length)
 
     def _keyboard_closed(self):
-        print('My keyboard have been closed!')
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard.unbind(on_key_up=self._on_keyboard_up)
         self._keyboard = None
@@ -230,7 +222,6 @@ class EscapeGame(Widget):
             self.animationFrame = -1
             Clock.schedule_interval(self.upAnimation, 1/30)
             self.riseSfx.play()
-        self.playerDot.pos = (self.enemy[0].pos[0], self.enemy[0].top - 30)
 
         # More Collisions yay! (this time on the top)
         if self.velocity * deltaTime > 0 and self.bgPixels.getpixel((     clamp(round((playerPos +73) / 3.75), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0) and self.bgPixels.getpixel((     clamp(round((playerPos +41) / 3.75), 0, self.bgSizes.width),    clamp(round(self.bgSizes.height - (self.player.pos[1] + self.velocity * deltaTime + 102)/3.75), 0, self.bgSizes.height -1)    )) == (0, 0, 0):
@@ -307,7 +298,6 @@ class EscapeGame(Widget):
                         self.checkScheduled[i] = True
                         Clock.schedule_once(partial(self.timedCatch, i), 1.5)
 
-        print(self.bg.pos[0], self.player.center_y)
         if -self.bg.pos[0] > 8100 and self.player.center_y > 430:
             self.youWon = Image(source="youWon.png", width=WINDOW_SIZE[0], height=WINDOW_SIZE[1])
             self.add_widget(self.youWon)
