@@ -11,7 +11,7 @@ from PIL import Image as PILImage
 import math as m
 
 WINDOW_SIZE = (800, 600)
-# Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
+Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
 
 def clamp(val: int | float, miminum: int | float, maximum: int | float) -> float:
     return min(maximum, max(miminum, val))
@@ -405,7 +405,8 @@ class EscapeGame(Widget):
         App.get_running_app().stop()
 
 class MainApp(App):
-    pass
+    def build(self):
+        return EscapeGame()
 
 if __name__ == "__main__":
     MainApp().run()
