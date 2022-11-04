@@ -11,7 +11,7 @@ from PIL import Image as PILImage
 import math as m
 
 WINDOW_SIZE = (800, 600)
-Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
+# Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
 
 def clamp(val: int | float, miminum: int | float, maximum: int | float) -> float:
     return min(maximum, max(miminum, val))
