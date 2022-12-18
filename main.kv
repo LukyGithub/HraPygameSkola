@@ -1,0 +1,25 @@
+#:kivy 1.0
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<BackgroundLabel@Label+BackgroundColor>
+    background_color: 0, 0, 0, 0
+
+<MenuContent@BoxLayout>:
+    orientation: "vertical"
+    BackgroundLabel:
+        text: "Art Find Escape"
+        font_size: 50
+        background_color: 1, 0.75, 0.46, 0.5
+    Button:
+        text:"PLAY!"
+        font_size: 50
+        background_normal: ""
+        background_color: 1, 0.75, 0.46, 0.8
+        on_press: root.play()

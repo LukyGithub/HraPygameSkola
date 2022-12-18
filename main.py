@@ -1,7 +1,13 @@
-from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.graphics import *
+from kivy.uix.widget import Widget
 from kivy.uix.image import Image
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.label import Label
 from kivy.metrics import dp    
 from kivy.core.window import Window
 from kivy.core.audio import SoundLoader
@@ -10,8 +16,9 @@ from functools import partial
 from PIL import Image as PILImage
 import math as m
 
-WINDOW_SIZE = (800, 600)
-Window.size = (WINDOW_SIZE[0], WINDOW_SIZE[1])
+INITIAL_WINDOW_SIZE = (800, 600)
+Window.size = (INITIAL_WINDOW_SIZE[0], INITIAL_WINDOW_SIZE[1])
+manager = ScreenManager(transition=NoTransition())
 
 def clamp(val: int | float, miminum: int | float, maximum: int | float) -> float:
     return min(maximum, max(miminum, val))
@@ -19,10 +26,39 @@ def clamp(val: int | float, miminum: int | float, maximum: int | float) -> float
 def lerp(a: float, b: float, t: float) -> float:
     return (1 - t) * a + t * b
 
+class MenuContent(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+
+    def play(self, **kwargs):
+        global manager
+        manager.current = "game"
+    
+    
+
+class MainMenu(AnchorLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        bgColor = Image(source="background.png", width=Window.size[0], height=Window.size[1], allow_stretch=True, keep_ratio=False)
+        self.add_widget(bgColor)
+        self.anchor_x="center"
+        self.anchor_y="center"
+        menuContent = MenuContent()
+        menuContent.size_hint=(.5, .5)
+        self.bg = Image(source="level01.png", size_hint=(None, None), width=Window.size[0]*19, height=Window.size[1], allow_stretch=True, keep_ratio=False)
+        self.bg.texture.mag_filter = "nearest"
+        self.add_widget(self.bg)
+        self.add_widget(menuContent)
+        Window.bind(on_resize=self.on_window_resize)
+
+    def on_window_resize(self, window, width, height):
+        self.bg.size = (Window.size[0]*19, Window.size[1])
+        self.bg.texture.mag_filter = "nearest"
+
 class EscapeGame(Widget):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)    
-        global WINDOW_SIZE    
+        super().__init__(**kwargs)
         #!!!!
         # Keyboard Management
         #!!!!
@@ -44,7 +80,7 @@ class EscapeGame(Widget):
         #!!!!
         # Widget Initialization
         #!!!!
-        self.bgColor = Image(source="background.png", width=WINDOW_SIZE[0], height=WINDOW_SIZE[1], allow_stretch=True, keep_ratio=False)
+        self.bgColor = Image(source="background.png", width=Window.size[0], height=Window.size[1], allow_stretch=True, keep_ratio=False)
         self.add_widget(self.bgColor)
 
         self.player = Image(source="./animations/player_0_0.png", width=dp(120), height=dp(120), allow_stretch=True)
@@ -99,7 +135,7 @@ class EscapeGame(Widget):
             self.playerWarned.append(False)
 
         # UPDATE
-        
+        Window.bind(on_resize=self.on_window_resize)
         self.gameSong = SoundLoader.load('gameMusicYay.mp3')
         self.gameSong.volume = 0.4
         self.riseSfx = SoundLoader.load('rockRise.mp3')
@@ -299,7 +335,7 @@ class EscapeGame(Widget):
                         Clock.schedule_once(partial(self.timedCatch, i), 1.5)
 
         if -self.bg.pos[0] > 8100 and self.player.center_y > 430:
-            self.youWon = Image(source="youWon.png", width=WINDOW_SIZE[0], height=WINDOW_SIZE[1])
+            self.youWon = Image(source="youWon.png", width=Window.size[0], height=Window.size[1])
             self.add_widget(self.youWon)
             Clock.schedule_once(self.endGame, 1)
             
@@ -400,13 +436,28 @@ class EscapeGame(Widget):
     
     def playSong(self, dt):
         self.gameSong.play()
+
+    def on_window_resize(self, window, width, height):
+        self.bgColor.size=Window.size
             
     def endGame(self, dt):
         App.get_running_app().stop()
 
+class MainMenuScreen(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.add_widget(MainMenu())
+
+class EscapeGameScreen(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.add_widget(EscapeGame())
+
 class MainApp(App):
     def build(self):
-        return EscapeGame()
-
+        global manager
+        manager.add_widget(MainMenuScreen(name="mainmenu"))
+        manager.add_widget(EscapeGameScreen(name="game"))
+        return manager
 if __name__ == "__main__":
     MainApp().run()
